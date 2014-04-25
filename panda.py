@@ -162,7 +162,7 @@ def write_profile_config():
     write_config("~/.profile", profileconfig.format(expanduser("~")))
 
 def write_scm_config():
-    access_key = raw_input("Kiln Access Key: ")
+    access_key = raw_input("Kiln Access Token: ")
     if access_key is not None and len(access_key) > 0:
         write_config("~/.hgrc", hgconfig.format(access_key))
         write_config("~/.gitconfig", gitconfig.format(access_key))
@@ -174,6 +174,7 @@ def main(args):
     parser.add_argument("-b", "--bamboo", help="Install Bamboo (panda) support", action="store_true", required=False)
     parser.add_argument("-w", "--web", help="Install Web (kungfu) support", action="store_true", required=False)
     parser.add_argument("-i", "--environment", help="Configure basic environment profile", action="store_true", required=False)
+    parser.add_argument("-k", "--kiln", help="Configure git and mercurial to use Kiln Access Tokens", action="store_true", required=False)
     args = parser.parse_args()
 
     if not args.environment and not args.emacs and not args.bamboo and not args.web and not args.agent:
@@ -183,6 +184,8 @@ def main(args):
     if args.environment:
         print("Installing basic environment profile...")
         write_profile_config()
+
+    if args.kiln:
         print("Setting up SCM...")
         write_scm_config()
 
