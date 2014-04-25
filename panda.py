@@ -17,7 +17,7 @@ agent_support = {
         "xcodeproj"
     ],
     "pip" : [
-        "paramiko"
+        ["paramiko"]
     ]
 }
 
@@ -175,6 +175,10 @@ def main(args):
     parser.add_argument("-w", "--web", help="Install Web (kungfu) support", action="store_true", required=False)
     parser.add_argument("-i", "--environment", help="Configure basic environment profile", action="store_true", required=False)
     args = parser.parse_args()
+
+    if not args.environment and not args.emacs and not args.bamboo and not args.web and not args.agent:
+        parser.print_help()
+        return 1
 
     if args.environment:
         print("Installing basic environment profile...")
