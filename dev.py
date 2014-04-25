@@ -16,6 +16,7 @@ brew_packages = [
     ,"heroku-toolbelt"
     ,"vorbis-tools"
     ,"fontforge"
+    ,"backflip-brew-tools"
 ]
 homebrew_taps = [
     "homebrew/versions"
@@ -31,14 +32,14 @@ pip_packages = [
     ,["pycrypto==2.6"]
     ,["boto"]
     ,["simplejson"]
-    ,["paramiko"]
+    ,["sphinx"]
+    ,["sphinxcontrib-googleanalytics"]
 ]
 gem_packages = [
     "json"
     ,"open4"
     ,"rest-client"
     ,"facter"
-    ,"xcodeproj"
 ]
 
 def communicate(args):
