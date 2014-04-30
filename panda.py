@@ -52,6 +52,11 @@ kiln.username = {}
 kiln.password = anypassword
 '''
 
+backflipbrewconfig = '''
+[auth]
+token={}
+'''
+
 profileconfig = '''
 export PANDA_HOME={}/panda
 
@@ -162,10 +167,14 @@ def write_profile_config():
     write_config("~/.profile", profileconfig.format(expanduser("~")))
 
 def write_scm_config():
-    access_key = raw_input("Kiln Access Token: ")
-    if access_key is not None and len(access_key) > 0:
-        write_config("~/.hgrc", hgconfig.format(access_key))
+    kiln_access_token = raw_input("Kiln Access Token: ")
+    if kiln_access_token is not None and len(kiln_access_token) > 0:
+        write_config("~/.hgrc", hgconfig.format(kiln_access_token))
         write_config("~/.gitconfig", gitconfig.format(access_key))
+
+    github_access_token = raw_input("Github Access Token: ")
+    if github_access_token:
+        write_config("~/.backflipbrew", backflipbrewconfig.format(github_access_token))
    
 def main(args):
     parser = argparse.ArgumentParser(description="Panda Build System setup script.")
