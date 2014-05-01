@@ -188,7 +188,7 @@ def main(args):
     parser.add_argument("-g", "--github", help="Configure to use Github Access Tokens for Homebrew", action="store_true", required=False)
     args = parser.parse_args()
 
-    if not args.environment and not args.emacs and not args.bamboo and not args.web and not args.agent:
+    if not args.emacs and not args.agent and not args.bamboo and not args.web and not args.environment and not args.kiln and not args.github:
         parser.print_help()
         return 1
 
