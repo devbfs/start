@@ -166,12 +166,13 @@ def write_config(path, content):
 def write_profile_config():
     write_config("~/.profile", profileconfig.format(expanduser("~")))
 
-def write_scm_config():
+def write_kiln_config():
     kiln_access_token = raw_input("Kiln Access Token: ")
     if kiln_access_token is not None and len(kiln_access_token) > 0:
         write_config("~/.hgrc", hgconfig.format(kiln_access_token))
         write_config("~/.gitconfig", gitconfig.format(access_key))
 
+def write_github_config():
     github_access_token = raw_input("Github Access Token: ")
     if github_access_token is not None and len(github_access_token) > 0:
         write_config("~/.backflipbrew", backflipbrewconfig.format(github_access_token))
@@ -184,6 +185,7 @@ def main(args):
     parser.add_argument("-w", "--web", help="Install Web (kungfu) support", action="store_true", required=False)
     parser.add_argument("-i", "--environment", help="Configure basic environment profile", action="store_true", required=False)
     parser.add_argument("-k", "--kiln", help="Configure git and mercurial to use Kiln Access Tokens", action="store_true", required=False)
+    parser.add_argument("-g", "--github", help="Configure to use Github Access Tokens for Homebrew", action="store_true", required=False)
     args = parser.parse_args()
 
     if not args.environment and not args.emacs and not args.bamboo and not args.web and not args.agent:
@@ -195,8 +197,12 @@ def main(args):
         write_profile_config()
 
     if args.kiln:
-        print("Setting up SCM...")
-        write_scm_config()
+        print("Setting up SCM for Kiln...")
+        write_kiln_config()
+
+    if args.github:
+        print("Setting Github for Homebrew...")
+        write_github_config()
 
     if args.emacs:
         print("Installing basic emacs setup...")
@@ -240,3 +246,4 @@ def main(args):
 
 if __name__ == '__main__':
     sys.exit(main(sys.argv))
+
