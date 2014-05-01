@@ -173,7 +173,7 @@ def write_scm_config():
         write_config("~/.gitconfig", gitconfig.format(access_key))
 
     github_access_token = raw_input("Github Access Token: ")
-    if github_access_token:
+    if github_access_token is not None and len(github_access_token) > 0:
         write_config("~/.backflipbrew", backflipbrewconfig.format(github_access_token))
    
 def main(args):
