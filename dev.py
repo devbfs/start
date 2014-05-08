@@ -40,6 +40,7 @@ gem_packages = [
     ,"open4"
     ,"rest-client"
     ,"facter"
+    ,"systemu"
 ]
 
 def communicate(args):
