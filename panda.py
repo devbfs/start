@@ -223,6 +223,8 @@ def main(args):
         install_call(['git', 'checkout', 'a30d082', 'Library/Formula/android-ndk.rb'], False)
         install_call(['brew', 'unlink', 'android-ndk'], False)
         install_call(['brew', 'install', 'android-ndk'], False)
+
+        install_call(['git', 'checkout', '--', 'Library/Formula/android-ndk.rb'], False)
         chdir(current_dir)
 
         print("Installing Xcode support...")
