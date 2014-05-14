@@ -4,6 +4,7 @@
 import sys
 import subprocess
 import argparse
+from os import chdir, getcwd
 from os.path import expanduser
 
 agent_support = {
@@ -210,6 +211,20 @@ def main(args):
         write_config("~/.emacs", emacsconfig)
 
     if args.agent:
+        # Agents need a couple versions of the Android NDK.
+        current_dir = getcwd()
+        brew_path = communicate(['brew', '--prefix'])
+        chdir(brew_path)
+        # r9c
+        install_call(['git', 'checkout', 'f284cac', 'Library/Formula/android-ndk.rb'], False)
+        install_call(['brew', 'unlink', 'android-ndk'], False)
+        install_call(['brew', 'install', 'android-ndk'], False)
+        # and r9
+        install_call(['git', 'checkout', 'a30d082', 'Library/Formula/android-ndk.rb'], False)
+        install_call(['brew', 'unlink', 'android-ndk'], False)
+        install_call(['brew', 'install', 'android-ndk'], False)
+        chdir(current_dir)
+
         print("Installing Xcode support...")
         for brew_package in agent_support["brew"]:
             brew_install(brew_package, False)
