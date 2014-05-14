@@ -170,7 +170,7 @@ def write_kiln_config():
     kiln_access_token = raw_input("Kiln Access Token: ")
     if kiln_access_token is not None and len(kiln_access_token) > 0:
         write_config("~/.hgrc", hgconfig.format(kiln_access_token))
-        write_config("~/.gitconfig", gitconfig.format(access_key))
+        write_config("~/.gitconfig", gitconfig.format(kiln_access_token))
 
 def write_github_config():
     github_access_token = raw_input("Github Access Token: ")
