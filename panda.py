@@ -212,6 +212,7 @@ def main(args):
 
     if args.agent:
         # Agents need a couple versions of the Android NDK.
+        # print('Installing NDK versions...')
         current_dir = getcwd()
         brew_path = communicate(['brew', '--prefix'])
         chdir(brew_path)
@@ -225,6 +226,12 @@ def main(args):
         install_call(['brew', 'install', 'android-ndk'], False)
 
         install_call(['git', 'checkout', '--', 'Library/Formula/android-ndk.rb'], False)
+        chdir(current_dir)
+
+        print('Cloning the panda repository...')
+        install_call(['git', 'clone', 'https://backflipstudios.kilnhg.com/Code/Repositories/Group/panda.git'], False)
+        chdir('panda')
+        install_call(['git', 'checkout', 'agent'], False)
         chdir(current_dir)
 
         print("Installing Xcode support...")
