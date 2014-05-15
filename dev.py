@@ -17,6 +17,7 @@ brew_packages = [
     ,"vorbis-tools"
     ,"fontforge"
     ,"backflip-brew-tools"
+    ,"backflip-engine-support"
 ]
 homebrew_taps = [
     "homebrew/versions"

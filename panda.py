@@ -229,6 +229,7 @@ def main(args):
         chdir(current_dir)
 
         print('Cloning the panda repository...')
+        chdir(expanduser('~'))
         install_call(['git', 'clone', 'https://backflipstudios.kilnhg.com/Code/Repositories/Group/panda.git'], False)
         chdir('panda')
         install_call(['git', 'checkout', 'agent'], False)
