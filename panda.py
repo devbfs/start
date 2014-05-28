@@ -13,6 +13,7 @@ agent_support = {
         ,"xcode-5.1-mac"
         ,"xcode-5.1.1-mac"
         ,"unity-4.3.4f1-mac"
+        ,"unity-4.5.0f6-mac"
     ],
     "gem" : [
         "xcodeproj"
