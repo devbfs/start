@@ -52,6 +52,9 @@ hgconfig = '''
 kiln.prefix = backflipstudios.kilnhg.com
 kiln.username = {}
 kiln.password = anypassword
+
+[extensions]
+purge =
 '''
 
 backflipbrewconfig = '''
