@@ -16,6 +16,7 @@ brew_packages = [
     ,"heroku-toolbelt"
     ,"vorbis-tools"
     ,"fontforge"
+    ,"webp"
     ,"backflip-brew-tools"
     ,"backflip-engine-support"
 ]
