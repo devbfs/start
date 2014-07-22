@@ -19,7 +19,9 @@ agent_support = {
         "xcodeproj"
     ],
     "pip" : [
-        ["paramiko"]
+        ["paramiko"
+         ,"requests"
+        ]
     ]
 }
 
