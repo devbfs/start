@@ -9,7 +9,9 @@ from os.path import expanduser
 
 agent_support = {
     "brew" : [
-        "xcode-5.0.2-mac"
+        "androidndk-9c-android"
+        ,"androidndk-9d-android"
+        ,"xcode-5.0.2-mac"
         ,"xcode-5.1-mac"
         ,"xcode-5.1.1-mac"
         ,"unity-4.3.4f1-mac"
