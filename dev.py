@@ -116,7 +116,7 @@ def main(args):
 
     brew = communicate(["brew", "--version"])
     if brew == None:
-        print("ERROR: Homebrew was not found. Please install homebrew first:\n\nruby -e \"$(curl -fsSL https://raw.github.com/mxcl/homebrew/go/install)\"\n\nDon't forget to run brew doctor and resolve any issues before continuing.\n\n")
+        print("ERROR: Homebrew was not found. Please install homebrew first:\n\nruby -e \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\"\n\nDon't forget to run brew doctor and resolve any issues before continuing.\n\n")
         return 1
 
     java = communicate(["java", "-version"])
