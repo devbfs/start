@@ -8,18 +8,27 @@ from os import chdir, getcwd
 from os.path import expanduser
 
 agent_support = {
-    "brew" : [
+    "brew": [
         "androidndk-9c-android"
         ,"androidndk-9d-android"
+        ,"androidndk-10d-android"
         ,"xcode-5.1.1-mac"
         ,"xcode-6.0.1-mac"
+        ,"xcode-6.1-mac"
+        ,"xcode-6.1.1-mac"
         ,"unity-4.3.4f1-mac"
         ,"unity-4.5.0f6-mac"
+        ,"unity-4.5.4f1-mac"
+        ,"unity-4.6.0f3-mac"
+        ,"unity-4.6.1p3-mac"
+        ,"unity-4.6.2p1-mac"
+        ,"unity-4.6.3f1-mac"
+        ,"unity-5.0.0b18-mac"
     ],
-    "gem" : [
-        "xcodeproj"
+    "gem": [
+        "xcodeproj -v 0.19.2"
     ],
-    "pip" : [
+    "pip": [
         ["paramiko"
          ,"requests"
         ]
@@ -27,20 +36,20 @@ agent_support = {
 }
 
 bamboo_support = {
-    "brew" : [
+    "brew": [
     ],
-    "gem" : [
+    "gem": [
     ],
-    "pip" : [
+    "pip": [
     ]
 }
 
 web_support = {
-    "brew" : [
+    "brew": [
     ],
-    "gem" : [
+    "gem": [
     ],
-    "pip" : [
+    "pip": [
     ]
 }
 

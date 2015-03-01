@@ -15,6 +15,7 @@ brew_packages = [
     ,"perforce"
     ,"heroku-toolbelt"
     ,"vorbis-tools"
+    ,"Caskroom/cask/xquartz"
     ,"fontforge"
     ,"webp"
     ,"backflip-brew-tools"
@@ -28,7 +29,7 @@ homebrew_taps = [
 ]
 pip_packages = [
     ["docutils"]
-    ,["PEAK-Rules", "--pre", "--allow-unverified", "PEAK-Rules"]
+    ,["PEAK-Rules==0.5a1.dev-r2707", "--pre", "--allow-unverified", "PEAK-Rules"]
     ,["keyring"]
     ,["mercurial_keyring"]
     ,["pycrypto==2.6"]
@@ -110,17 +111,17 @@ def validate_path():
     
 def main(args):
     clang = communicate(["xcrun", "clang", "--version"])
-    if clang == None:
+    if clang is None:
         print("ERROR: Xcode command line tools are not installed. Please install the command line tools before continuing")
         return 1
 
     brew = communicate(["brew", "--version"])
-    if brew == None:
+    if brew is None:
         print("ERROR: Homebrew was not found. Please install homebrew first:\n\nruby -e \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\"\n\nDon't forget to run brew doctor and resolve any issues before continuing.\n\n")
         return 1
 
     java = communicate(["java", "-version"])
-    if java == None:
+    if java is None:
         print("ERROR: Please install java before continuing:\n\nhttp://support.apple.com/kb/DL1572?viewlocale=en_US\n\n")
         return 1
 
@@ -153,12 +154,12 @@ def main(args):
     brew_install("ruby193", True)
 
     path = communicate(["which", "python"])
-    if path == None or path != "/usr/local/bin/python":
+    if path is None or path != "/usr/local/bin/python":
         print("ERROR: Python environment is not configured properly. Ensure that /usr/local/bin is listed before /usr/bin in your PATH.")
         return 1
 
     path = communicate(["which", "ruby"])
-    if path == None or path != "/usr/local/bin/ruby":
+    if path is None or path != "/usr/local/bin/ruby":
         print("ERROR: Ruby environment is not configured properly. Ensure that /usr/local/bin is listed before /usr/bin in your PATH.")
         return 1
 
