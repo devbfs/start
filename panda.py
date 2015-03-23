@@ -139,7 +139,7 @@ def communicate(args):
         output, error = process.communicate()
         if process.returncode == 0:
             result = output.strip()
-    except Exception, e:
+    except Exception:
         pass
     return result
 
@@ -161,20 +161,20 @@ def ask_or_exit(ret):
 def install_call(args, fail_on_error):
     ret = call(args)
     if ret != 0:
-        print("\nERROR: Failed to install package: %s" % (args))
+        print("\nERROR: Failed to install package: {}".format(args))
         if fail_on_error:
             sys.exit(ret)
         else:
             ask_or_exit(ret)
     
 def brew_install(package_name, fail_on_error):
-    install_call(["brew", "install", package_name], fail_on_error)
+    install_call(["brew", "install"] + package_name.split(), fail_on_error)
     
 def pip_install(package_props, fail_on_error):
     install_call(["pip", "install"] + package_props, fail_on_error)
     
 def gem_install(package_name, fail_on_error):
-    install_call(["gem", "install", package_name], fail_on_error)
+    install_call(["gem", "install"] + package_name.split(), fail_on_error)
 
 def write_config(path, content):
     with open(expanduser(path), "w") as f:
@@ -194,7 +194,7 @@ def write_github_config():
     if github_access_token is not None and len(github_access_token) > 0:
         write_config("~/.backflipbrew", backflipbrewconfig.format(github_access_token))
    
-def main(args):
+def main():
     parser = argparse.ArgumentParser(description="Panda Build System setup script.")
     parser.add_argument("-e", "--emacs", help="Install/configure basic emacs setup", action="store_true", required=False)
     parser.add_argument("-a", "--agent", help="Install Agent (redpanda) support", action="store_true", required=False)
@@ -227,23 +227,6 @@ def main(args):
         write_config("~/.emacs", emacsconfig)
 
     if args.agent:
-        # Agents need a couple versions of the Android NDK.
-        # print('Installing NDK versions...')
-        current_dir = getcwd()
-        brew_path = communicate(['brew', '--prefix'])
-        chdir(brew_path)
-        # r9c
-        install_call(['git', 'checkout', 'f284cac', 'Library/Formula/android-ndk.rb'], False)
-        install_call(['brew', 'unlink', 'android-ndk'], False)
-        install_call(['brew', 'install', 'android-ndk'], False)
-        # and r9
-        install_call(['git', 'checkout', 'a30d082', 'Library/Formula/android-ndk.rb'], False)
-        install_call(['brew', 'unlink', 'android-ndk'], False)
-        install_call(['brew', 'install', 'android-ndk'], False)
-
-        install_call(['git', 'checkout', '--', 'Library/Formula/android-ndk.rb'], False)
-        chdir(current_dir)
-
         print('Cloning the panda repository...')
         chdir(expanduser('~'))
         install_call(['git', 'clone', 'https://backflipstudios.kilnhg.com/Code/Repositories/Group/panda.git'], False)
@@ -286,5 +269,5 @@ def main(args):
     return 0
 
 if __name__ == '__main__':
-    sys.exit(main(sys.argv))
+    sys.exit(main())
 
