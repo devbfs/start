@@ -1,51 +1,58 @@
 #!/usr/bin/env python
+import argparse
 import re
 import sys
 import subprocess
 
+from os.path import expanduser
+
 brew_packages = [
-    "mercurial"
-    ,"google-app-engine"
-    ,"android-sdk"
-    ,"android-ndk"
-    ,"ant"
-    ,"git"
-    ,"perforce"
-    ,"heroku-toolbelt"
-    ,"vorbis-tools"
-    ,"Caskroom/cask/xquartz"
-    ,"fontforge"
-    ,"webp"
-    ,"backflip-brew-tools"
-    ,"backflip-engine-support"
+    "mercurial",
+    "google-app-engine",
+    "android-sdk",
+    "android-ndk",
+    "ant",
+    "git",
+    "perforce",
+    "heroku-toolbelt",
+    "vorbis-tools",
+    "fontforge",
+    "webp",
+    "backflip-brew-tools",
+    "backflip-engine-support"
 ]
 
 homebrew_taps = [
-    "homebrew/versions"
-    ,"homebrew/binary"
-    ,"homebrew/dupes"
-    ,"devbfs/homebrew-formulas"
+    "homebrew/versions",
+    "homebrew/binary",
+    "homebrew/dupes",
+    "devbfs/homebrew-formulas"
 ]
 
 pip_packages = [
-    ["docutils"]
-    ,["PEAK-Rules==0.5a1.dev-r2707", "--pre", "--allow-unverified", "PEAK-Rules"]
-    ,["keyring"]
-    ,["mercurial_keyring"]
-    ,["pycrypto==2.6"]
-    ,["boto"]
-    ,["simplejson"]
-    ,["sphinx"]
-    ,["sphinxcontrib-googleanalytics"]
+    ["docutils"],
+    ["PEAK-Rules==0.5a1.dev-r2707", "--pre", "--allow-unverified", "PEAK-Rules"],
+    ["keyring"],
+    ["mercurial_keyring"],
+    ["pycrypto==2.6"],
+    ["boto"],
+    ["simplejson"],
+    ["sphinx"],
+    ["sphinxcontrib-googleanalytics"]
 ]
 
 gem_packages = [
-    "json"
-    ,"open4"
-    ,"rest-client"
-    ,"facter"
-    ,"systemu"
+    "json",
+    "open4",
+    "rest-client",
+    "facter",
+    "systemu"
 ]
+
+repositories_cfg = '''count=1
+src00=https\://s3.amazonaws.com/android-sdk-manager/redist/addon.xml
+'''
+
 
 def communicate(args, exit_on_error=True, **kwargs):
     input_data = kwargs['input'] if 'input' in kwargs else None
@@ -67,9 +74,11 @@ def communicate(args, exit_on_error=True, **kwargs):
 
     return stdout_data.strip()
 
+
 def call(args):
     ret = subprocess.call(args)
     return ret
+
 
 def ask_or_exit(ret):
     while True:
@@ -80,23 +89,28 @@ def ask_or_exit(ret):
             print("Aborting.")
             sys.exit(ret)
 
-def install_call(args, fail_on_error):
+
+def install_call(args, fail_on_error, quiet=False):
     ret = call(args)
     if ret != 0:
-        print("\nERROR: Failed to install package: %s" % (args))
+        print("\nERROR: Failed to install package: {}".format(args))
         if fail_on_error:
             sys.exit(ret)
-        else:
+        elif not quiet:
             ask_or_exit(ret)
     
-def brew_install(package_name, fail_on_error):
-    install_call(["brew", "install", package_name], fail_on_error)
-    
-def pip_install(package_props, fail_on_error):
-    install_call(["pip", "install"] + package_props, fail_on_error)
-    
-def gem_install(package_name, fail_on_error):
-    install_call(["gem", "install", package_name], fail_on_error)
+
+def brew_install(package_name, fail_on_error, quiet=False):
+    install_call(["brew", "install"] + package_name.split(), fail_on_error, quiet)
+
+
+def pip_install(package_props, fail_on_error, quiet=False):
+    install_call(["pip", "install"] + package_props, fail_on_error, quiet)
+
+
+def gem_install(package_name, fail_on_error, quiet=False):
+    install_call(["gem", "install"] + package_name.split(), fail_on_error, quiet)
+
 
 def validate_path():
     p1 = subprocess.Popen(["/usr/bin/env"], stdout=subprocess.PIPE, shell=False)
@@ -117,30 +131,45 @@ def validate_path():
 
     return True
     
+
 def main():
+    create_repositories_cfg()
+    install_fire_phone_sdk(list_sdk_packages())
+    sys.exit(0)
+
+    parser = argparse.ArgumentParser(description="Developer machine setup script..")
+    parser.add_argument("-q", "--quiet", help="Quiet mode. Suppresses error messages from most failed installations.",
+                        action="store_true", required=False)
+    args = parser.parse_args()
+
     clang = communicate(["xcrun", "clang", "--version"])
     if clang is None:
-        print("ERROR: Xcode command line tools are not installed. Please install the command line tools before continuing.")
+        print("ERROR: Xcode command line tools are not installed. "
+              "Please install the command line tools before continuing.")
         return 1
 
     brew = communicate(["brew", "--version"])
     if brew is None:
-        print("ERROR: Homebrew was not found. Please install homebrew first:\n\nruby -e \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\"\n\nDon't forget to run brew doctor and resolve any issues before continuing.\n\n")
+        print("ERROR: Homebrew was not found. Please install homebrew first:\n\n"
+              "ruby -e \"$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)\"\n\n"
+              "Don't forget to run brew doctor and resolve any issues before continuing.\n\n")
         return 1
 
     java = communicate(["java", "-version"])
     if java is None:
-        print("ERROR: Please install java before continuing:\n\nhttp://support.apple.com/kb/DL1572?viewlocale=en_US\n\n")
+        print("ERROR: Please install java before continuing:\n\n"
+              "http://support.apple.com/kb/DL1572?viewlocale=en_US\n\n")
         return 1
 
     if not validate_path():
-        print("ERROR: /usr/bin occurs before /usr/local/bin.\n\nHere is a one-liner:\n\necho export PATH=\"/usr/local/bin:$PATH\" >> ~/.bash_profile\n")
+        print("ERROR: /usr/bin occurs before /usr/local/bin.\n\n"
+              "Here is a one-liner:\n\necho export PATH=\"/usr/local/bin:$PATH\" >> ~/.bash_profile\n")
         return 1
 
     print("Updating Homebrew...")
     ret = call(["brew", "update"])
     if ret != 0:
-        print("WARNING: brew update returned response: %d" % (ret))
+        print("WARNING: brew update returned response: {}".format(ret))
         ask_or_exit(ret)
 
     ret = call(["brew", "doctor"])
@@ -163,25 +192,27 @@ def main():
 
     path = communicate(["which", "python"])
     if path is None or path != "/usr/local/bin/python":
-        print("ERROR: Python environment is not configured properly. Ensure that /usr/local/bin is listed before /usr/bin in your PATH.")
+        print("ERROR: Python environment is not configured properly. "
+              "Ensure that /usr/local/bin is listed before /usr/bin in your PATH.")
         return 1
 
     path = communicate(["which", "ruby"])
     if path is None or path != "/usr/local/bin/ruby":
-        print("ERROR: Ruby environment is not configured properly. Ensure that /usr/local/bin is listed before /usr/bin in your PATH.")
+        print("ERROR: Ruby environment is not configured properly. "
+              "Ensure that /usr/local/bin is listed before /usr/bin in your PATH.")
         return 1
 
     print("Installing BREW packages...")
     for brew_package in brew_packages:
-        brew_install(brew_package, False)
+        brew_install(brew_package, False, args.quiet)
 
     print("Installing PIP packages...")
     for pip_package in pip_packages:
-        pip_install(pip_package, False)
+        pip_install(pip_package, False, args.quiet)
 
     print("Installing GEM packages...")
     for gem_package in gem_packages:
-        gem_install(gem_package, False)
+        gem_install(gem_package, False, args.quiet)
 
     install_android_sdk_packages()
 
@@ -189,6 +220,7 @@ def main():
 
 
 def install_android_sdk_packages():
+    create_repositories_cfg()
     packages = list_sdk_packages()
 
     # Install the latest Android SDK tools.
@@ -204,8 +236,23 @@ def install_android_sdk_packages():
     # Install the latest Build tools.
     install_package_by_name('build-tools-{}'.format(get_latest_build_tools_version(packages)))
 
+    # Install the Fire Phone SDK. This is needed to build DragonVale Amazon.
+    install_fire_phone_sdk(packages)
+
+    # Install the Fire Phone Build Tools. Also for DV Amazon.
+    install_package_by_name('extra-amazon-buildtools')
+
+
+def create_repositories_cfg():
+    # This is a workaround to the fact that there is no way to define user-defined sites for android through the
+    # command line. We create a file called repositories.cfg in ~/.android which we point to Amazon so we can install
+    # the Fire Phone SDK and Build Tools.
+    with open(expanduser('~/.android/repositories.cfg'), 'w') as f:
+        f.write(repositories_cfg)
+
 
 def list_sdk_packages():
+    # This command lists extended information about all packages available to be installed.
     args = [
         'android',
         'list',
@@ -239,6 +286,12 @@ def get_latest_sdk_version(packages):
     # Search through the output to find the latest version of the sdk.
     # This matches any number of digits only if it's preceded by the string '"android-'.
     return int(re.search('(?<="android-)\d+', packages).group())
+
+
+def install_fire_phone_sdk(packages):
+    # Get the latest version of the Fire Phone SDK.
+    version = re.search('(?<="addon-amazon_fire_phone_addon-amazon-)\d+', packages).group()
+    install_package_by_name('addon-amazon_fire_phone_addon-amazon-' + version)
 
 
 if __name__ == '__main__':
