@@ -10,7 +10,6 @@ brew_packages = [
     ,"android-ndk"
     ,"ant"
     ,"git"
-    ,"ack"
     ,"perforce"
     ,"heroku-toolbelt"
     ,"vorbis-tools"
@@ -20,12 +19,14 @@ brew_packages = [
     ,"backflip-brew-tools"
     ,"backflip-engine-support"
 ]
+
 homebrew_taps = [
     "homebrew/versions"
     ,"homebrew/binary"
     ,"homebrew/dupes"
     ,"devbfs/homebrew-formulas"
 ]
+
 pip_packages = [
     ["docutils"]
     ,["PEAK-Rules==0.5a1.dev-r2707", "--pre", "--allow-unverified", "PEAK-Rules"]
@@ -37,6 +38,7 @@ pip_packages = [
     ,["sphinx"]
     ,["sphinxcontrib-googleanalytics"]
 ]
+
 gem_packages = [
     "json"
     ,"open4"
@@ -45,21 +47,28 @@ gem_packages = [
     ,"systemu"
 ]
 
-def communicate(args):
-    result = None
-    try:
-        process = subprocess.Popen(args, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=False)
-        output, error = process.communicate()
-        if process.returncode == 0:
-            result = output.strip()
-    except Exception:
-        pass
-    return result
+def communicate(args, exit_on_error=True, **kwargs):
+    input_data = kwargs['input'] if 'input' in kwargs else None
+
+    p = subprocess.Popen(args,
+                         stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                         cwd=(kwargs['cwd'] if 'cwd' in kwargs else None))
+
+    stdout_data, stderr_data = p.communicate(input=input_data)
+
+    if p.returncode != 0:
+        logger.error(' '.join(args))
+        logger.error('{}'.format(stderr_data.rstrip()))
+
+        if exit_on_error:
+            sys.exit(1)
+        else:
+            return stderr_data
+
+    return stdout_data.strip()
 
 def call(args):
     ret = subprocess.call(args)
-    # if ret != 0:
-    #     print("WARNING: subprocess  call (%s) returned %d" % (args, ret))
     return ret
 
 def ask_or_exit(ret):
@@ -97,7 +106,7 @@ def validate_path():
     if p2.returncode != 0:
         return False
 
-    if path == None:
+    if path is None:
         return False
 
     idx1 = path.find("/usr/local/bin")
@@ -128,6 +137,12 @@ def main():
         print("ERROR: /usr/bin occurs before /usr/local/bin.\n\nHere is a one-liner:\n\necho export PATH=\"/usr/local/bin:$PATH\" >> ~/.bash_profile\n")
         return 1
 
+    print("Updating Homebrew...")
+    ret = call(["brew", "update"])
+    if ret != 0:
+        print("WARNING: brew update returned response: %d" % (ret))
+        ask_or_exit(ret)
+
     ret = call(["brew", "doctor"])
     if ret != 0:
         print("WARNING: brew doctor returned error response. Please resolve all issues before continuing.")
@@ -139,12 +154,6 @@ def main():
         if ret != 0:
             print("WARNING: brew tap {} returned response: {}".format(tap, ret))
             ask_or_exit(ret)
-
-    print("Updating Homebrew...")
-    ret = call(["brew", "update"])
-    if ret != 0:
-        print("WARNING: brew update returned response: %d" % (ret))
-        ask_or_exit(ret)
 
     print("Installing python...")
     brew_install("python", True)
@@ -208,6 +217,7 @@ def list_sdk_packages():
 
 
 def install_package_by_name(filter_name):
+    print 'Installing {}.'.format(filter_name)
     args = [
         'android',
         'update',
@@ -217,7 +227,7 @@ def install_package_by_name(filter_name):
         '-t',
         filter_name
     ]
-    install_call(args, False)
+    print communicate(args, input="y")
 
 
 def get_latest_build_tools_version(packages):
