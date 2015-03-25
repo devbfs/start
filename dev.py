@@ -1,6 +1,5 @@
 #!/usr/bin/env python
-# encoding: utf-8
-
+import re
 import sys
 import subprocess
 
@@ -53,7 +52,7 @@ def communicate(args):
         output, error = process.communicate()
         if process.returncode == 0:
             result = output.strip()
-    except Exception, e:
+    except Exception:
         pass
     return result
 
@@ -109,10 +108,10 @@ def validate_path():
 
     return True
     
-def main(args):
+def main():
     clang = communicate(["xcrun", "clang", "--version"])
     if clang is None:
-        print("ERROR: Xcode command line tools are not installed. Please install the command line tools before continuing")
+        print("ERROR: Xcode command line tools are not installed. Please install the command line tools before continuing.")
         return 1
 
     brew = communicate(["brew", "--version"])
@@ -175,10 +174,62 @@ def main(args):
     for gem_package in gem_packages:
         gem_install(gem_package, False)
 
-    print("Running the Android SDK package installer...\n\nRequirements:\n\nTools:\n\tAndroid SDK Tools\n\tAndroid SDK Platform-tools\n\tAndroid SDK Build-tools\n\nAndroid APIs:\n\tSDK Platform for API 7 through the latest.\n\n")
-    call(["android"])
+    install_android_sdk_packages()
 
     return 0
 
+
+def install_android_sdk_packages():
+    packages = list_sdk_packages()
+
+    # Install the latest Android SDK tools.
+    install_package_by_name('tool')
+
+    # Install the latest Android SDK Platform-tools.
+    install_package_by_name('platform-tool')
+
+    # Install all versions of the SDK starting with API 7.
+    for x in range(7, get_latest_sdk_version(packages) + 1):
+        install_package_by_name('android-{}'.format(x))
+
+    # Install the latest Build tools.
+    install_package_by_name('build-tools-{}'.format(get_latest_build_tools_version(packages)))
+
+
+def list_sdk_packages():
+    args = [
+        'android',
+        'list',
+        'sdk',
+        '-a',
+        '-e'
+    ]
+    return communicate(args)
+
+
+def install_package_by_name(filter_name):
+    args = [
+        'android',
+        'update',
+        'sdk',
+        '-u',
+        '-a',
+        '-t',
+        filter_name
+    ]
+    install_call(args, False)
+
+
+def get_latest_build_tools_version(packages):
+    # Build tools doesn't have its own filter so we have to find the latest version ourselves.
+    return re.search('(?<="build-tools-)\d+\.\d+\.\d+', packages).group()
+
+
+def get_latest_sdk_version(packages):
+    # Search through the output to find the latest version of the sdk.
+    # This matches any number of digits only if it's preceded by the string '"android-'.
+    return int(re.search('(?<="android-)\d+', packages).group())
+
+
 if __name__ == '__main__':
-    sys.exit(main(sys.argv))
+    sys.exit(main())
