@@ -4,7 +4,8 @@ import re
 import sys
 import subprocess
 
-from os.path import expanduser
+from os import mkdir
+from os.path import expanduser, isdir, join
 
 brew_packages = [
     "mercurial",
@@ -133,10 +134,6 @@ def validate_path():
     
 
 def main():
-    create_repositories_cfg()
-    install_fire_phone_sdk(list_sdk_packages())
-    sys.exit(0)
-
     parser = argparse.ArgumentParser(description="Developer machine setup script..")
     parser.add_argument("-q", "--quiet", help="Quiet mode. Suppresses error messages from most failed installations.",
                         action="store_true", required=False)
@@ -247,7 +244,11 @@ def create_repositories_cfg():
     # This is a workaround to the fact that there is no way to define user-defined sites for android through the
     # command line. We create a file called repositories.cfg in ~/.android which we point to Amazon so we can install
     # the Fire Phone SDK and Build Tools.
-    with open(expanduser('~/.android/repositories.cfg'), 'w') as f:
+    dot_android_path = expanduser('~/.android')
+    if not isdir(dot_android_path):
+        mkdir(dot_android_path)
+
+    with open(join(dot_android_path, 'repositories.cfg'), 'w') as f:
         f.write(repositories_cfg)
 
 
