@@ -1,36 +1,30 @@
 #!/usr/bin/env python
-# encoding: utf-8
-
-import sys
-import subprocess
 import argparse
+import ConfigParser
+import subprocess
+import sys
+
 from os import chdir, getcwd
 from os.path import expanduser
+from socket import gethostname
 
 agent_support = {
     "brew": [
-        "androidndk-9c-android"
-        ,"androidndk-9d-android"
-        ,"androidndk-10d-android"
-        ,"xcode-5.1.1-mac"
-        ,"xcode-6.0.1-mac"
-        ,"xcode-6.1-mac"
-        ,"xcode-6.1.1-mac"
-        ,"unity-4.3.4f1-mac"
-        ,"unity-4.5.0f6-mac"
-        ,"unity-4.5.4f1-mac"
-        ,"unity-4.6.0f3-mac"
-        ,"unity-4.6.1p3-mac"
-        ,"unity-4.6.2p1-mac"
-        ,"unity-4.6.3f1-mac"
-        ,"unity-5.0.0b18-mac"
+        "androidndk-9c-android",
+        "androidndk-9d-android",
+        "androidndk-10d-android",
+        "xcode-6.1.1-mac",
+        "xcode-6.2-mac",
+        "unity-4.6.3f1-mac",
+        "unity-4.6.3p3-mac",
+        "unity-5.0.0b18-mac"
     ],
     "gem": [
         "xcodeproj -v 0.19.2"
     ],
     "pip": [
-        ["paramiko"
-         ,"requests"
+        ["paramiko",
+         "requests"
         ]
     ]
 }
@@ -132,6 +126,7 @@ emacsconfig = '''
 
 '''
 
+
 def communicate(args):
     result = None
     try:
@@ -143,11 +138,11 @@ def communicate(args):
         pass
     return result
 
+
 def call(args):
     ret = subprocess.call(args)
-    # if ret != 0:
-    #     print("WARNING: subprocess  call (%s) returned %d" % (args, ret))
     return ret
+
 
 def ask_or_exit(ret):
     while True:
@@ -158,6 +153,7 @@ def ask_or_exit(ret):
             print("Aborting.")
             sys.exit(ret)
 
+
 def install_call(args, fail_on_error):
     ret = call(args)
     if ret != 0:
@@ -167,43 +163,73 @@ def install_call(args, fail_on_error):
         else:
             ask_or_exit(ret)
     
+
 def brew_install(package_name, fail_on_error):
     install_call(["brew", "install"] + package_name.split(), fail_on_error)
     
+
 def pip_install(package_props, fail_on_error):
     install_call(["pip", "install"] + package_props, fail_on_error)
     
+
 def gem_install(package_name, fail_on_error):
     install_call(["gem", "install"] + package_name.split(), fail_on_error)
+
 
 def write_config(path, content):
     with open(expanduser(path), "w") as f:
         f.write(content)
 
+
 def write_profile_config():
     write_config("~/.profile", profileconfig.format(expanduser("~")))
 
-def write_kiln_config():
-    kiln_access_token = raw_input("Kiln Access Token: ")
+
+def write_kiln_config(config_parser):
+    if config_parser:
+        # Get the first part of the hostname if the fully qualified domain name is used. This gives us 'red-panda1' if
+        # the FQDN is 'red-panda1.backflipstudios.com'.
+        hostname = gethostname().split('.')[0]
+        try:
+            kiln_access_token = config_parser.get('kiln', hostname)
+        except ConfigParser.NoOptionError:
+            print 'ERROR: Hostname does not match any values in .tokens.'
+            sys.exit(1)
+    else:
+        kiln_access_token = raw_input("Kiln Access Token: ")
+
     if kiln_access_token is not None and len(kiln_access_token) > 0:
         write_config("~/.hgrc", hgconfig.format(kiln_access_token))
         write_config("~/.gitconfig", gitconfig.format(kiln_access_token))
 
-def write_github_config():
-    github_access_token = raw_input("Github Access Token: ")
+
+def write_github_config(config_parser):
+    if config_parser:
+        github_access_token = config_parser.get('github', 'token')
+    else:
+        github_access_token = raw_input("Github Access Token: ")
+
     if github_access_token is not None and len(github_access_token) > 0:
         write_config("~/.backflipbrew", backflipbrewconfig.format(github_access_token))
    
+
 def main():
     parser = argparse.ArgumentParser(description="Panda Build System setup script.")
     parser.add_argument("-e", "--emacs", help="Install/configure basic emacs setup", action="store_true", required=False)
-    parser.add_argument("-a", "--agent", help="Install Agent (redpanda) support", action="store_true", required=False)
+    parser.add_argument("-a", "--agent", help="Install Agent (red-panda) support", action="store_true", required=False)
     parser.add_argument("-b", "--bamboo", help="Install Bamboo (panda) support", action="store_true", required=False)
     parser.add_argument("-w", "--web", help="Install Web (kungfu) support", action="store_true", required=False)
     parser.add_argument("-i", "--environment", help="Configure basic environment profile", action="store_true", required=False)
     parser.add_argument("-k", "--kiln", help="Configure git and mercurial to use Kiln Access Tokens", action="store_true", required=False)
     parser.add_argument("-g", "--github", help="Configure to use Github Access Tokens for Homebrew", action="store_true", required=False)
     args = parser.parse_args()
+
+    config = ConfigParser.SafeConfigParser()
+    try:
+        with open(expanduser('~/.tokens')) as f:
+            config.readfp(f)
+    except IOError:
+        config = None
 
     if not args.emacs and not args.agent and not args.bamboo and not args.web and not args.environment and not args.kiln and not args.github:
         parser.print_help()
@@ -215,11 +241,11 @@ def main():
 
     if args.kiln:
         print("Setting up SCM for Kiln...")
-        write_kiln_config()
+        write_kiln_config(config)
 
     if args.github:
         print("Setting Github for Homebrew...")
-        write_github_config()
+        write_github_config(config)
 
     if args.emacs:
         print("Installing basic emacs setup...")
