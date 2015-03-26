@@ -226,12 +226,17 @@ def install_android_sdk_packages():
     # Install the latest Android SDK Platform-tools.
     install_package_by_name('platform-tool')
 
-    # Install all versions of the SDK starting with API 7.
-    for x in range(7, get_latest_sdk_version(packages) + 1):
+    # Install all versions of the SDK starting with API 10 (Gingerbread 2.3.3).
+    for x in range(10, get_latest_sdk_version(packages) + 1):
         install_package_by_name('android-{}'.format(x))
 
     # Install the latest Build tools.
     install_package_by_name('build-tools-{}'.format(get_latest_build_tools_version(packages)))
+
+    # Install version 21.1.2 of the Build tools. This is a workaround for zipalign and other build tools that did not
+    # update their path to use the latest version of the build tools.
+    # Remove this after they fix this issue.
+    install_package_by_name('build-tools-21.1.2')
 
     # Install the Fire Phone SDK. This is needed to build DragonVale Amazon.
     install_fire_phone_sdk(packages)
