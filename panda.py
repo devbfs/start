@@ -254,6 +254,7 @@ def main():
 
     if args.agent:
         print('Cloning the panda repository...')
+        current_dir = getcwd()
         chdir(expanduser('~'))
         install_call(['git', 'clone', 'https://backflipstudios.kilnhg.com/Code/Repositories/Group/panda.git'], False)
         chdir('panda')
