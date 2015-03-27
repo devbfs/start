@@ -131,7 +131,7 @@ bamboo_plist = '''
         <key>UserName</key>
         <string>bamboo</string>
 
-	<key>EnvironmentVariables</key>
+    <key>EnvironmentVariables</key>
         <dict>
             <key>PATH</key>  <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
             <key>PANDA_HOME</key>  <string>/Users/bamboo/panda/</string>
@@ -201,7 +201,6 @@ emacsconfig = '''
 (setq backup-directory-alist `(("." . "~/.emacs.backups/")))
 (setq auto-save-list-file-prefix "~/.emacs.backups/")
 (setq auto-save-file-name-transforms `((".*" "~/.emacs.backups/" t)))
-
 '''
 
 
@@ -242,16 +241,16 @@ def install_call(args, fail_on_error, quiet=False):
             ask_or_exit(ret)
     
 
-def brew_install(package_name, fail_on_error):
-    install_call(['brew', 'install'] + package_name.split(), fail_on_error)
-    
+def brew_install(package_name, fail_on_error, quiet=False):
+    install_call(["brew", "install"] + package_name.split(), fail_on_error, quiet)
 
-def pip_install(package_props, fail_on_error):
-    install_call(['pip', 'install'] + package_props, fail_on_error)
-    
 
-def gem_install(package_name, fail_on_error):
-    install_call(['gem', 'install'] + package_name.split(), fail_on_error)
+def pip_install(package_props, fail_on_error, quiet=False):
+    install_call(["pip", "install"] + package_props, fail_on_error, quiet)
+
+
+def gem_install(package_name, fail_on_error, quiet=False):
+    install_call(["gem", "install"] + package_name.split(), fail_on_error, quiet)
 
 
 def write_config(path, content):
@@ -345,7 +344,7 @@ def main():
 
     config = ConfigParser.SafeConfigParser()
     try:
-        with open(expanduser('~/.tokens')) as f:
+        with open(expanduser('/.tokens')) as f:
             config.readfp(f)
     except IOError:
         config = None
@@ -378,35 +377,35 @@ def main():
 
         print('Installing Xcode support...')
         for brew_package in agent_support['brew']:
-            brew_install(brew_package, False)
+            brew_install(brew_package, False, args.quiet)
 
         for pip_package in agent_support['pip']:
-            pip_install(pip_package, False)
+            pip_install(pip_package, False, args.quiet)
 
         for gem_package in agent_support['gem']:
-            gem_install(gem_package, False)
+            gem_install(gem_package, False, args.quiet)
 
     if args.bamboo:
         print('Installing Xcode support...')
         for brew_package in bamboo_support['brew']:
-            brew_install(brew_package, False)
+            brew_install(brew_package, False, args.quiet)
 
         for pip_package in bamboo_support['pip']:
-            pip_install(pip_package, False)
+            pip_install(pip_package, False, args.quiet)
 
         for gem_package in bamboo_support['gem']:
-            gem_install(gem_package, False)
+            gem_install(gem_package, False, args.quiet)
 
     if args.web:
         print('Installing Xcode support...')
         for brew_package in web_support['brew']:
-            brew_install(brew_package, False)
+            brew_install(brew_package, False, args.quiet)
 
         for pip_package in web_support['pip']:
-            pip_install(pip_package, False)
+            pip_install(pip_package, False, args.quiet)
 
         for gem_package in web_support['gem']:
-            gem_install(gem_package, False)
+            gem_install(gem_package, False, args.quiet)
 
     return 0
 
