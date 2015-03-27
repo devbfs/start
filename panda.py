@@ -4,8 +4,8 @@ import ConfigParser
 import subprocess
 import sys
 
-from os import chdir, getcwd
-from os.path import expanduser
+from os import chdir, getcwd, mkdir
+from os.path import expanduser, isdir
 from socket import gethostname
 
 agent_support = {
@@ -17,7 +17,7 @@ agent_support = {
         'xcode-6.2-mac',
         'unity-4.6.3f1-mac',
         'unity-4.6.3p3-mac',
-        'unity-5.0.0b18-mac'
+        'unity-5.0.0f4-mac'
     ],
     'gem': [
         'xcodeproj -v 0.19.2'
@@ -76,6 +76,80 @@ profileconfig = '''
 export PANDA_HOME={}/panda
 
 alias la="ls -la"
+'''
+
+update_agent = '''
+#/bin/sh
+cd ~/panda
+git pull origin agent
+'''
+
+clean_build_dir = '''
+#/bin/sh
+BUILD_DIR=~/bamboo-agent-home/xml-data/build-dir
+
+echo "Clearing build dir: ${BUILD_DIR}"
+
+cd $BUILD_DIR
+pwd
+rm -fr ./*
+
+echo "Bamboo build dir clean completed."
+'''
+
+clean_build_dir_plist= '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>Label</key>
+        <string>com.backflipstudios.cleanbuilddir</string>
+
+        <key>ProgramArguments</key>
+        <array>
+            <string>/Users/bamboo/clear_build_dir.sh</string>
+        </array>
+
+        <key>StartCalendarInterval</key>
+        <dict>
+                <key>Minute</key><integer>0</integer>
+                <key>Hour</key><integer>4</integer>
+                <key>WeekDay</key><integer>6</integer>
+        </dict>
+    </dict>
+</plist>
+'''
+
+bamboo_plist = '''
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+    <dict>
+        <key>Label</key>
+        <string>com.atlassian.bamboo</string>
+
+        <key>UserName</key>
+        <string>bamboo</string>
+
+	<key>EnvironmentVariables</key>
+        <dict>
+            <key>PATH</key>  <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+            <key>PANDA_HOME</key>  <string>/Users/bamboo/panda/</string>
+        </dict>
+
+        <key>ProgramArguments</key>
+        <array>
+            <string>/Users/bamboo/bamboo-agent-home/bin/bamboo-agent.sh</string>
+            <string>console</string>
+        </array>
+
+        <key>RunAtLoad</key>
+        <true/>
+
+        <key>SessionCreate</key>
+        <true/>
+    </dict>
+</plist>
 '''
 
 emacsconfig = '''
@@ -205,7 +279,7 @@ def write_kiln_config(config_parser):
     if kiln_access_token is not None and len(kiln_access_token) > 0:
         write_config('~/.hgrc', hgconfig.format(kiln_access_token))
         write_config('~/.gitconfig', gitconfig.format(kiln_access_token))
-        write_config('~/.git-credentials', gitcredentials.format(kiln_access_token, 'apw'))
+        write_config('~/.git-credentials', gitcredentials.format(kiln_access_token, 'anypassword'))
 
 
 def write_github_config(config_parser):
@@ -217,6 +291,44 @@ def write_github_config(config_parser):
     if github_access_token is not None and len(github_access_token) > 0:
         write_config('~/.backflipbrew', backflipbrewconfig.format(github_access_token))
    
+
+def write_plists():
+    print('Installing launch agents to ~/Library/LaunchAgents...')
+    launchagent_path = '~/Library/LaunchAgents/'
+    if not isdir(expanduser(launchagent_path)):
+        mkdir(expanduser(launchagent_path))
+
+    write_config(launchagent_path, bamboo_plist)
+    write_config(launchagent_path, clean_build_dir_plist)
+
+
+def write_shell_scripts():
+    print('Installing support scripts to ~/...')
+    write_config('~', update_agent)
+    write_config('~', clean_build_dir)
+
+
+def clone_panda_repo():
+    print('Cloning the panda repository...')
+    current_dir = getcwd()
+    chdir(expanduser('~'))
+    install_call(['git', 'clone', 'https://backflipstudios.kilnhg.com/Code/Repositories/Group/panda.git'], False)
+    chdir('panda')
+    install_call(['git', 'checkout', 'agent'], False)
+    chdir(current_dir)
+
+
+def accept_unity_license():
+    pass
+
+
+def xcode_select():
+    pass
+
+
+def install_developer_certificate():
+    pass
+
 
 def main():
     parser = argparse.ArgumentParser(description='Panda Build System setup script.')
@@ -260,13 +372,9 @@ def main():
         write_config('~/.emacs', emacsconfig)
 
     if args.agent:
-        print('Cloning the panda repository...')
-        current_dir = getcwd()
-        chdir(expanduser('~'))
-        install_call(['git', 'clone', 'https://backflipstudios.kilnhg.com/Code/Repositories/Group/panda.git'], False)
-        chdir('panda')
-        install_call(['git', 'checkout', 'agent'], False)
-        chdir(current_dir)
+        clone_panda_repo()
+        write_plists()
+        write_shell_scripts()
 
         print('Installing Xcode support...')
         for brew_package in agent_support['brew']:
