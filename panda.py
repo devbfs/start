@@ -5,7 +5,7 @@ import subprocess
 import sys
 
 from os import chdir, getcwd, mkdir
-from os.path import expanduser, isdir
+from os.path import expanduser, isdir, join
 from socket import gethostname
 
 agent_support = {
@@ -50,7 +50,7 @@ web_support = {
 gitconfig = '''
 [credential "https://backflipstudios.kilnhg.com"]
 username = {}
-helper = osxkeychain
+helper = store
 '''
 
 gitcredentials = '''
@@ -293,19 +293,19 @@ def write_github_config(config_parser):
    
 
 def write_plists():
-    print('Installing launch agents to ~/Library/LaunchAgents...')
     launchagent_path = '~/Library/LaunchAgents/'
+    print('Installing launch agents to {}...'.format(launchagent_path))
     if not isdir(expanduser(launchagent_path)):
         mkdir(expanduser(launchagent_path))
 
-    write_config(launchagent_path, bamboo_plist)
-    write_config(launchagent_path, clean_build_dir_plist)
+    write_config(join(launchagent_path, 'com.atlassian.bamboo.plist'), bamboo_plist)
+    write_config(join(launchagent_path, 'com.backflipstudios.cleanbuilddir.plist'), clean_build_dir_plist)
 
 
 def write_shell_scripts():
     print('Installing support scripts to ~/...')
-    write_config('~', update_agent)
-    write_config('~', clean_build_dir)
+    write_config(join('~', 'update_agent.sh'), update_agent)
+    write_config(join('~', 'clear_build_dir.sh'), clean_build_dir)
 
 
 def clone_panda_repo():
