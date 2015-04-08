@@ -4,7 +4,7 @@ import re
 import sys
 import subprocess
 
-from os import mkdir
+from os import chdir, getcwd, mkdir
 from os.path import expanduser, isdir, join
 
 brew_packages = [
@@ -223,7 +223,7 @@ def install_perforce():
     current_dir = getcwd()
     brew_path = communicate(['brew', '--prefix'])
     chdir(brew_path)
-    # r9c
+
     install_call(['git', 'checkout', '9e690fcf9f44d95300707a5b2f7ab3d64958e62f', 'Library/Formula/perforce.rb'], False)
     install_call(['brew', 'install', 'perforce'], False)
 
