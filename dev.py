@@ -14,7 +14,6 @@ brew_packages = [
     "android-ndk",
     "ant",
     "git",
-    "perforce",
     "heroku-toolbelt",
     "vorbis-tools",
     "fontforge",
@@ -199,6 +198,8 @@ def main():
               "Ensure that /usr/local/bin is listed before /usr/bin in your PATH.")
         return 1
 
+    install_perforce()
+
     print("Installing BREW packages...")
     for brew_package in brew_packages:
         brew_install(brew_package, False, args.quiet)
@@ -214,6 +215,20 @@ def main():
     install_android_sdk_packages()
 
     return 0
+
+
+def install_perforce():
+    # Temporary checkout of specific version of the P4 formula. The checksum for the latest version is incorrect as
+    # of 04/08/15. Hopefully they will fix it soon and I can remove this hack.
+    current_dir = getcwd()
+    brew_path = communicate(['brew', '--prefix'])
+    chdir(brew_path)
+    # r9c
+    install_call(['git', 'checkout', '9e690fcf9f44d95300707a5b2f7ab3d64958e62f', 'Library/Formula/perforce.rb'], False)
+    install_call(['brew', 'install', 'perforce'], False)
+
+    install_call(['git', 'checkout', '--', 'Library/Formula/perforce.rb'], False)
+    chdir(current_dir)
 
 
 def install_android_sdk_packages():
