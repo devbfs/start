@@ -14,6 +14,7 @@ brew_packages = [
     "android-ndk",
     "ant",
     "git",
+    "perforce",
     "heroku-toolbelt",
     "vorbis-tools",
     "fontforge",
@@ -218,16 +219,18 @@ def main():
 
 
 def install_perforce():
-    # Temporary checkout of specific version of the P4 formula. The checksum for the latest version is incorrect as
-    # of 04/08/15. Hopefully they will fix it soon and I can remove this hack.
+    # Change the expected SHA-256 for the perforce formula.
     current_dir = getcwd()
     brew_path = communicate(['brew', '--prefix'])
     chdir(brew_path)
 
-    install_call(['git', 'checkout', '9e690fcf9f44d95300707a5b2f7ab3d64958e62f', 'Library/Formula/perforce.rb'], False)
-    install_call(['brew', 'install', 'perforce'], False)
+    with open('Library/Formulas/perforce.rb', 'r') as f:
+        contents = f.read().replace('0d2ad21ecc03493a9b429907fb49209369ca09fd87340c03812dc1d1748dc562',
+                                    'fe01f8b613bb72d63e1a5bd278e5020d8bcd0c618f4f74ca2060cf9041581816')
 
-    install_call(['git', 'checkout', '--', 'Library/Formula/perforce.rb'], False)
+    with open('Library/Formulas/perforce.rb', 'w') as f:
+        f.write(contents)
+
     chdir(current_dir)
 
 
