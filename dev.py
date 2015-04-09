@@ -184,8 +184,8 @@ def main():
     print("Installing python...")
     brew_install("python", False, True)
 
-    # Retrying if python install fails.
-    brew_install("python", True)
+    # Retrying postinstall. Doubt this will work.
+    install_call(["brew", "postinstall", "python"], False, args.quiet)
 
     print("Installing ruby...")
     brew_install("ruby193", True)
