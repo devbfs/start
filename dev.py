@@ -199,7 +199,7 @@ def main():
               "Ensure that /usr/local/bin is listed before /usr/bin in your PATH.")
         return 1
 
-    install_perforce()
+    fix_perforce_sha256()
 
     print("Installing BREW packages...")
     for brew_package in brew_packages:
@@ -218,7 +218,7 @@ def main():
     return 0
 
 
-def install_perforce():
+def fix_perforce_sha256():
     # Change the expected SHA-256 for the perforce formula.
     current_dir = getcwd()
     brew_path = communicate(['brew', '--prefix'])
