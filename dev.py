@@ -224,11 +224,11 @@ def install_perforce():
     brew_path = communicate(['brew', '--prefix'])
     chdir(brew_path)
 
-    with open('Library/Formulas/perforce.rb', 'r') as f:
+    with open('/Library/Formulas/perforce.rb', 'r') as f:
         contents = f.read().replace('0d2ad21ecc03493a9b429907fb49209369ca09fd87340c03812dc1d1748dc562',
                                     'fe01f8b613bb72d63e1a5bd278e5020d8bcd0c618f4f74ca2060cf9041581816')
 
-    with open('Library/Formulas/perforce.rb', 'w') as f:
+    with open('/Library/Formulas/perforce.rb', 'w') as f:
         f.write(contents)
 
     chdir(current_dir)
