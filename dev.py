@@ -182,7 +182,7 @@ def main():
             ask_or_exit(ret)
 
     print("Installing python...")
-    brew_install("python", False, True)
+    brew_install("python", True)
 
     print("Installing ruby...")
     brew_install("ruby193", True)
