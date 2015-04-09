@@ -182,6 +182,9 @@ def main():
             ask_or_exit(ret)
 
     print("Installing python...")
+    brew_install("python", False, True)
+
+    # Retrying if python install fails.
     brew_install("python", True)
 
     print("Installing ruby...")
