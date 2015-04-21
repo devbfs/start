@@ -45,7 +45,7 @@ pip_packages = [
 gem_packages = [
     "json",
     "open4",
-    "rest-client",
+    "rest_client",
     "facter",
     "systemu"
 ]
