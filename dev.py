@@ -226,7 +226,7 @@ def fix_perforce_sha256():
 
     with open(join(brew_path, 'Library/Formula/perforce.rb'), 'r') as f:
         contents = f.read().replace('0d2ad21ecc03493a9b429907fb49209369ca09fd87340c03812dc1d1748dc562',
-                                    'fe01f8b613bb72d63e1a5bd278e5020d8bcd0c618f4f74ca2060cf9041581816')
+                                    'c1f920a244f53907a6edfa7fe9d6472ecafffc17e026d9165a2a6e6c65a0ef72')
 
     with open(join(brew_path, 'Library/Formula/perforce.rb'), 'w') as f:
         f.write(contents)
