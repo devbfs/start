@@ -19,8 +19,7 @@ brew_packages = [
     "vorbis-tools",
     "fontforge",
     "webp",
-    "backflip-brew-tools",
-    "backflip-engine-support"
+    "backflip-brew-tools"
 ]
 
 homebrew_taps = [
