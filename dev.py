@@ -99,7 +99,7 @@ def install_call(args, fail_on_error, quiet=False):
             sys.exit(ret)
         elif not quiet:
             ask_or_exit(ret)
-    
+
 
 def brew_install(package_name, fail_on_error, quiet=False):
     install_call(["brew", "install"] + package_name.split(), fail_on_error, quiet)
@@ -131,7 +131,7 @@ def validate_path():
         return False
 
     return True
-    
+
 
 def main():
     parser = argparse.ArgumentParser(description="Developer machine setup script..")
@@ -185,7 +185,7 @@ def main():
     brew_install("python", True)
 
     print("Installing ruby...")
-    brew_install("ruby193", True)
+    brew_install("ruby", True)
 
     path = communicate(["which", "python"])
     if path is None or path != "/usr/local/bin/python":
@@ -198,8 +198,6 @@ def main():
         print("ERROR: Ruby environment is not configured properly. "
               "Ensure that /usr/local/bin is listed before /usr/bin in your PATH.")
         return 1
-
-    fix_perforce_sha256()
 
     print("Installing BREW packages...")
     for brew_package in brew_packages:
@@ -216,22 +214,6 @@ def main():
     install_android_sdk_packages()
 
     return 0
-
-
-def fix_perforce_sha256():
-    # Change the expected SHA-256 for the perforce formula.
-    current_dir = getcwd()
-    brew_path = communicate(['brew', '--prefix'])
-    chdir(brew_path)
-
-    with open(join(brew_path, 'Library/Formula/perforce.rb'), 'r') as f:
-        contents = f.read().replace('0d2ad21ecc03493a9b429907fb49209369ca09fd87340c03812dc1d1748dc562',
-                                    'c1f920a244f53907a6edfa7fe9d6472ecafffc17e026d9165a2a6e6c65a0ef72')
-
-    with open(join(brew_path, 'Library/Formula/perforce.rb'), 'w') as f:
-        f.write(contents)
-
-    chdir(current_dir)
 
 
 def install_android_sdk_packages():
