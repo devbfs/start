@@ -31,7 +31,6 @@ homebrew_taps = [
 
 pip_packages = [
     ["docutils"],
-    ["PEAK-Rules==0.5a1.dev-r2707", "--pre", "--allow-unverified", "PEAK-Rules"],
     ["keyring"],
     ["mercurial_keyring"],
     ["pycrypto==2.6"],
